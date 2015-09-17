@@ -18,6 +18,8 @@
   "homepage": "https://github.com/FunkeDope/TwitMonLee",
   "dependencies": {
     "express": "^4.13.3",
+    "mysql": "^2.9.0",
+    "node-pushover": "^0.2.2",
     "twitter": "^1.2.5"
   },
   "devDependencies": {
