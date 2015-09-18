@@ -95,21 +95,22 @@ client.stream('statuses/filter', {track: keywordsCSV}, function(stream) {
                tweet.text.toLowerCase().indexOf('voto') < 0 &&
                tweet.text.toLowerCase().indexOf('stop by') < 0 &&
                tweet.text.toLowerCase().indexOf('click here') < 0 &&
-               tweet.text.toLowerCase().indexOf('I\'ve entered') < 0
+               tweet.text.toLowerCase().indexOf('i\'ve entered') < 0 &&
+               tweet.text.toLowerCase().indexOf('i\'m entered') < 0
             ) {
                 //now make sure the actual text contains a phrase. twitter returns a lot of bs. card text matches the filter which we dont want
                 var excludeRegex = /.+( ?)(: RT(:?))/ig; 
                 var match = tweet.text.match(excludeRegex);
                 if(!match) {
                     //console.log(tweet);
-                    console.log('@' + tweet.user.screen_name + ': ' + tweet.text);
+                    /*console.log('@' + tweet.user.screen_name + ': ' + tweet.text);
                     console.log('------------------------------');
                     //wait anywhere from half a second to 1mins to enter
                     var delay = Math.floor((Math.random() * 1) + 300);
                     delay = delay * 1000;
                     setTimeout(function() {
                         enterContest(tweet);
-                    }, delay);
+                    }, delay);*/
                 }
             }
         }
@@ -179,6 +180,19 @@ function follow(id) {
         }
     });
 }
+function unFollow(id) {
+    'use strict';
+    client.post('friendships/destroy', {user_id: id},  function(error, tweet, response){
+        if(error) {
+            console.log(error);
+            console.log(id);
+            //throw error;
+        }
+        else {
+           console.log('Unfollowed: ' + id);
+        }
+    });
+}
 function checkIfDeleted(tweet) {
     'use strict';
     client.get('statuses/show', {id: tweet.id_str, trim_user: true, include_entities: false},  function(error, tw, response){
@@ -237,8 +251,8 @@ function hasEntered(tweet) {
             console.log(err);
             throw err;
         }
-        if(!rows) {
-            console.log('ALREADY ENTERED A CONTEST FROM THIS USER');
+        if(rows.length > 0) {
+            console.log('!!ALREADY ENTERED A CONTEST FROM THIS USER!!  : ' + tweet.user.id);
             return false;
         }
         else {
@@ -303,7 +317,31 @@ function updateDB(tweet, rt, fav, follow) {
     return true;
 }
 
-
+//unfollows ~50 - 150 users in random intervals
+function getUsersToUnfollow() {
+    'use strict';
+    var unFollowNumber = Math.floor((Math.random() * 150) + 50);
+    var sql = 'SELECT userID FROM Contests WHERE following = 1 ORDER BY timeEntered ASC LIMIT ' + unFollowNumber;
+    pool.query(sql, function(err, rows, fields) {
+        if(err) {
+            console.log(err);
+            throw err;
+        }
+        else {
+            //console.log(sql);
+            //console.log(rows);
+            for(var i = 0; i < rows.length; i++) {
+                var delay = Math.floor((Math.random() * 1) + 300);
+                delay = delay * 1000;
+                setInterval(function() {
+                    console.log(i);
+                    console.log(rows[i]);
+                    unFollow(rows[i].userID);
+                }, delay);
+            }
+        }
+    });
+}
 
 
 
@@ -319,7 +357,7 @@ if(DEV_MODE === true) {
             process.exit();
          }
          else if(key && key.name === 'space') {
-             sendTweet();
+             getUsersToUnfollow();
          }
     });
 
