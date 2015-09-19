@@ -6,8 +6,9 @@ const DEV_MODE = true;
 var mysql = require('mysql');
 var pool  = mysql.createPool({
     connectionLimit : 10,
-    host            : 'localhost',
-    database        : 'TwitMonLee',
+    host            : creds.mysql.host,
+    port            : creds.mysql.port,
+    database        : creds.mysql.dbName,
     user            : creds.mysql.user,
     password        : creds.mysql.password
 });
@@ -332,11 +333,11 @@ function getUsersToUnfollow() {
             //console.log(rows);
             for(var i = 0; i < rows.length; i++) {
                 var delay = Math.floor((Math.random() * 1) + 300);
-                delay = delay * 1000;
+                //delay = delay * 1000;
                 setInterval(function() {
                     console.log(i);
                     console.log(rows[i]);
-                    unFollow(rows[i].userID);
+                    //unFollow(rows[i].userID);
                 }, delay);
             }
         }
